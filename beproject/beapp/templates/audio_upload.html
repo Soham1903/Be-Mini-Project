@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Audio Analysis</title>
+    <style>
+      /* Global styles */
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f4f8;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        color: #333;
+      }
+
+      /* Container */
+      .container {
+        background: #ffffff;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        padding: 30px;
+        width: 90%;
+        max-width: 1200px;
+        text-align: center;
+      }
+
+      /* Title */
+      h1 {
+        font-size: 24px;
+        color: #4a90e2;
+        margin-bottom: 20px;
+      }
+
+      /* Form */
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+      }
+
+      label {
+        font-weight: bold;
+        color: #333;
+      }
+
+      /* File input */
+      input[type="file"] {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+        color: #4a90e2;
+      }
+
+      /* Button */
+      button {
+        background-color: #4a90e2;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #357ab8;
+      }
+
+      /* Results Table */
+      #results {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f9fafb;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+      }
+
+      th {
+        background-color: #4a90e2;
+        color: white;
+        width: 30%;
+      }
+
+      td {
+        width: 70%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Upload Audio File for Analysis</h1>
+      <form
+        id="uploadForm"
+        method="post"
+        enctype="multipart/form-data"
+        action="{% url 'analyze_audio' %}"
+      >
+        {% csrf_token %}
+        <label for="audioFile">Select an audio file:</label>
+        <input
+          type="file"
+          id="audioFile"
+          name="audio_file"
+          accept="audio/*"
+          required
+        />
+        <button type="submit">Analyze</button>
+      </form>
+
+      <div id="results"></div>
+    </div>
+
+    <script>
+      const form = document.getElementById("uploadForm");
+      form.onsubmit = async function (e) {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const response = await fetch("{% url 'analyze_audio' %}", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          displayTable(data);
+        } else {
+          document.getElementById("results").innerHTML =
+            "Error analyzing audio file.";
+        }
+      };
+
+      function displayTable(data) {
+        // Clear any previous results
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.innerHTML = "";
+
+        // Convert data to array format if it's a single object
+        const dataArray = Array.isArray(data) ? data : [data];
+
+        // Create a table element
+        const table = document.createElement("table");
+
+        // Populate rows for each attribute
+        Object.entries(dataArray[0]).forEach(([key, value]) => {
+          const row = document.createElement("tr");
+
+          const keyCell = document.createElement("th");
+          keyCell.textContent = key.charAt(0).toUpperCase() + key.slice(1);
+          row.appendChild(keyCell);
+
+          const valueCell = document.createElement("td");
+          valueCell.textContent = value;
+          row.appendChild(valueCell);
+
+          table.appendChild(row);
+        });
+
+        // Add the table to the results div
+        resultsDiv.appendChild(table);
+      }
+    </script>
+  </body>
+</html>

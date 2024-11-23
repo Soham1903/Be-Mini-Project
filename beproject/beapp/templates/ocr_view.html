@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OCR Image Upload</title>
+    <style>
+      /* Basic Reset */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+      }
+
+      /* Body Styling */
+      body {
+        background-color: #f4f6f9;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+      }
+
+      /* Container Styling */
+      .container {
+        max-width: 1600px;
+        width: 100%;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-top: 20px;
+      }
+
+      /* Heading */
+      h1 {
+        color: #0066cc;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      /* Form Styling */
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      button {
+        background-color: #0066cc;
+        color: #ffffff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #005bb5;
+      }
+
+      /* Extracted Text Styling */
+      .extracted-text {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #e9f5ff;
+        border-left: 4px solid #0066cc;
+        border-radius: 4px;
+      }
+
+      .extracted-text h2 {
+        color: #0066cc;
+        margin-bottom: 10px;
+      }
+
+      pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+
+      /* Table Styling */
+      .fact-checking-table {
+        width: 100%;
+        margin-top: 20px;
+        border-collapse: collapse;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .fact-checking-table th,
+      .fact-checking-table td {
+        padding: 12px;
+        border: 1px solid #ddd;
+        text-align: left;
+      }
+
+      .fact-checking-table th {
+        background-color: #0066cc;
+        color: #ffffff;
+      }
+
+      .fact-checking-table tr:nth-child(even) {
+        background-color: #f4f6f9;
+      }
+
+      /* Image Styling */
+      .uploaded-image {
+        margin-top: 20px;
+        max-width: 100%;
+        height: auto;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Upload an Image for OCR</h1>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %} {{ form.as_p }}
+        <button type="submit">Extract Text</button>
+      </form>
+
+      {% if image_url %}
+      <div class="uploaded-image">
+        <h2>Uploaded Image:</h2>
+        <img src="{{ image_url }}" alt="Uploaded Image" />
+      </div>
+      {% endif %} {% if text %}
+      <div class="extracted-text">
+        <h2>Extracted Text:</h2>
+        <pre>{{ text }}</pre>
+      </div>
+      {% endif %} {% if all_fact_check_results %}
+      <table class="fact-checking-table">
+        <thead>
+          <tr>
+            <th>Sentence #</th>
+            <th>Sentence</th>
+            <th>Fact-Checking Results</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for result in all_fact_check_results %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ result.sentence }}</td>
+            <td>
+              <ul>
+                {% for fact in result.facts %}
+                <li>{{ fact }}</li>
+                {% endfor %}
+              </ul>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+    </div>
+  </body>
+</html>

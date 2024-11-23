@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Legal Query Analysis</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f5f5f5;
+        color: #333;
+      }
+
+      h1 {
+        color: #4caf50;
+        text-align: center;
+      }
+
+      label,
+      textarea,
+      button,
+      input {
+        display: block;
+        width: 100%;
+        max-width: 600px;
+        margin: 10px auto;
+      }
+
+      textarea {
+        resize: vertical;
+        padding: 8px;
+        font-size: 16px;
+      }
+
+      button {
+        padding: 10px;
+        font-size: 16px;
+        font-weight: bold;
+        color: #fff;
+        background-color: #4caf50;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      #results {
+        max-width: 800px;
+        margin: 20px auto;
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+
+      th {
+        background-color: #4caf50;
+        color: white;
+        font-weight: bold;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Legal Query Analysis</h1>
+    <label for="audioFile">Upload your audio file:</label>
+    <input type="file" id="audioFile" accept="audio/*" />
+    <button id="analyzeButton">Analyze Audio Query</button>
+    <div id="results"></div>
+    <button id="analyzeTableButton" style="display: none">
+      Analyze Table Data
+    </button>
+    <div id="stats" style="max-width: 800px; margin: 20px auto"></div>
+
+    <script>
+      const analyzeButton = document.getElementById("analyzeButton");
+      const audioFileInput = document.getElementById("audioFile");
+      const analyzeTableButton = document.getElementById("analyzeTableButton");
+      const statsDiv = document.getElementById("stats");
+
+      analyzeButton.onclick = async () => {
+        const audioFile = audioFileInput.files[0];
+
+        if (!audioFile) {
+          alert("Please upload an audio file to analyze.");
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("audio_file", audioFile);
+
+        const response = await fetch("{% url 'analyze_legal_query' %}", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+        displayResultsTable(data);
+        analyzeTableButton.style.display = "block";
+      };
+
+      function displayResultsTable(data) {
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.innerHTML = "";
+
+        if (data.length === 0) {
+          resultsDiv.innerHTML = "<p>No relevant legal information found.</p>";
+          return;
+        }
+
+        const table = document.createElement("table");
+
+        const headerRow = document.createElement("tr");
+        const headers = [
+          "Best Matched Question",
+          "Sentence",
+          "Answer",
+          "Similarity Score",
+          "Result",
+        ];
+        headers.forEach((header) => {
+          const th = document.createElement("th");
+          th.innerText = header;
+          headerRow.appendChild(th);
+        });
+        table.appendChild(headerRow);
+
+        data.forEach((result) => {
+          result.forEach((entry) => {
+            const row = document.createElement("tr");
+
+            const bestMatchQuestionCell = document.createElement("td");
+            bestMatchQuestionCell.innerText =
+              entry["Best Match Question"] || "-";
+            row.appendChild(bestMatchQuestionCell);
+
+            const sentenceCell = document.createElement("td");
+            sentenceCell.innerText = entry.Sentence || "-";
+            row.appendChild(sentenceCell);
+
+            const answerCell = document.createElement("td");
+            answerCell.innerText = entry.Answer || "-";
+            row.appendChild(answerCell);
+
+            const similarityScoreCell = document.createElement("td");
+            similarityScoreCell.innerText = entry["Similarity Score"] || "-";
+            row.appendChild(similarityScoreCell);
+
+            const resultCell = document.createElement("td");
+            const toggleButton = document.createElement("button");
+            toggleButton.innerText = entry.Result ? "True" : "False";
+            toggleButton.style.backgroundColor = entry.Result
+              ? "#4caf50"
+              : "#f44336";
+            toggleButton.onclick = () => {
+              const isTrue = toggleButton.innerText === "True";
+              toggleButton.innerText = isTrue ? "False" : "True";
+              toggleButton.style.backgroundColor = isTrue
+                ? "#f44336"
+                : "#4caf50";
+            };
+            resultCell.appendChild(toggleButton);
+            row.appendChild(resultCell);
+
+            table.appendChild(row);
+          });
+        });
+
+        resultsDiv.appendChild(table);
+      }
+
+      analyzeTableButton.onclick = () => {
+        const rows = document.querySelectorAll("#results table tr");
+        let trueCount = 0;
+        let falseCount = 0;
+
+        rows.forEach((row, index) => {
+          if (index === 0) return;
+          const button = row.querySelector("button");
+          if (button.innerText === "True") trueCount++;
+          else falseCount++;
+        });
+
+        const total = trueCount + falseCount;
+        const truePercentage = ((trueCount / total) * 100).toFixed(2);
+        const falsePercentage = ((falseCount / total) * 100).toFixed(2);
+
+        statsDiv.innerHTML = `
+  <h2 style="text-align: center; color: #4caf50;">Table Analysis</h2>
+  <table style="width: 100%; max-width: 600px; margin: 20px auto; border-collapse: collapse; background-color: #fff; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);">
+    <thead>
+      <tr style="background-color: #4caf50; color: #fff;">
+        <th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Metric</th>
+        <th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="background-color: #f9f9f9;">
+        <td style="padding: 12px; border: 1px solid #ddd;">Total Sentences</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">${total}</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;">True Sentences</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">${trueCount} (${truePercentage}%)</td>
+      </tr>
+      <tr style="background-color: #f9f9f9;">
+        <td style="padding: 12px; border: 1px solid #ddd;">False Sentences</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">${falseCount} (${falsePercentage}%)</td>
+      </tr>
+    </tbody>
+  </table>
+`;
+      };
+    </script>
+  </body>
+</html>

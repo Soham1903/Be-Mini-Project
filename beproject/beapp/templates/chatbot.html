@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chatbot</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        padding: 20px;
+      }
+
+      h1 {
+        text-align: center;
+        font-size: 36px;
+        margin-bottom: 20px;
+        color: #4a90e2;
+      }
+
+      #chat-box {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        height: 400px;
+        overflow-y: scroll;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      #messages {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        overflow-y: auto;
+      }
+
+      #message-input {
+        width: 100%;
+        padding: 12px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        font-size: 16px;
+        resize: none;
+        min-height: 60px;
+        outline: none;
+        margin-top: 10px;
+        transition: border-color 0.3s ease;
+      }
+
+      #message-input:focus {
+        border-color: #4a90e2;
+      }
+
+      #send-btn {
+        width: 100%;
+        background-color: #4a90e2;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: background-color 0.3s ease;
+      }
+
+      #send-btn:hover {
+        background-color: #357ab7;
+      }
+
+      div {
+        padding: 8px 12px;
+        border-radius: 20px;
+        max-width: 80%;
+        word-wrap: break-word;
+      }
+
+      div.bot {
+        background-color: #f1f1f1;
+        align-self: flex-start;
+        border-radius: 20px 20px 0 20px;
+      }
+
+      div.user {
+        background-color: #4a90e2;
+        color: white;
+        align-self: flex-end;
+        border-radius: 20px 20px 20px 0;
+      }
+
+      textarea:focus {
+        outline: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Chatbot</h1>
+    <div id="chat-box">
+      <div id="messages"></div>
+      <textarea id="message-input" placeholder="Ask me anything..."></textarea>
+      <button id="send-btn">Send</button>
+    </div>
+
+    <script>
+      const sendButton = document.getElementById("send-btn");
+      const messageInput = document.getElementById("message-input");
+      const messagesDiv = document.getElementById("messages");
+
+      sendButton.addEventListener("click", () => {
+        const userMessage = messageInput.value;
+        if (!userMessage) return;
+
+        // Display user message
+        const userDiv = document.createElement("div");
+        userDiv.textContent = `You: ${userMessage}`; // Correct template literal
+        userDiv.classList.add("user"); // Add the user class for styling
+        messagesDiv.appendChild(userDiv);
+
+        // Send message to the chatbot API as JSON
+        fetch("/chat/", {
+          // Ensure you're hitting the correct endpoint
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json", // Correct content-type for JSON
+          },
+          body: JSON.stringify({ message: userMessage }), // Send the message as JSON
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            // Display chatbot's response
+            const botDiv = document.createElement("div");
+            botDiv.textContent = `Bot: ${data.response}`; // Correct template literal
+            botDiv.classList.add("bot"); // Add the bot class for styling
+            messagesDiv.appendChild(botDiv);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+
+        messageInput.value = ""; // Clear the input field after sending the message
+      });
+    </script>
+  </body>
+</html>

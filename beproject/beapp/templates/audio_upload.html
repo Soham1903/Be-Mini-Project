@@ -2,180 +2,403 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Audio Analysis</title>
-    <style>
-      /* Global styles */
-      body {
-        font-family: Arial, sans-serif;
-        background-color: #f0f4f8;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-        color: #333;
-      }
-
-      /* Container */
-      .container {
-        background: #ffffff;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-        padding: 30px;
-        width: 90%;
-        max-width: 1200px;
-        text-align: center;
-      }
-
-      /* Title */
-      h1 {
-        font-size: 24px;
-        color: #4a90e2;
-        margin-bottom: 20px;
-      }
-
-      /* Form */
-      form {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 15px;
-      }
-
-      label {
-        font-weight: bold;
-        color: #333;
-      }
-
-      /* File input */
-      input[type="file"] {
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        cursor: pointer;
-        color: #4a90e2;
-      }
-
-      /* Button */
-      button {
-        background-color: #4a90e2;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        font-size: 16px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-      }
-
-      button:hover {
-        background-color: #357ab8;
-      }
-
-      /* Results Table */
-      #results {
-        margin-top: 20px;
-        padding: 15px;
-        background-color: #f9fafb;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-
-      th,
-      td {
-        padding: 10px;
-        border-bottom: 1px solid #ddd;
-        text-align: left;
-      }
-
-      th {
-        background-color: #4a90e2;
-        color: white;
-        width: 30%;
-      }
-
-      td {
-        width: 70%;
-      }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Audio Analysis Dashboard</title>
   </head>
-  <body>
-    <div class="container">
-      <h1>Upload Audio File for Analysis</h1>
-      <form
-        id="uploadForm"
-        method="post"
-        enctype="multipart/form-data"
-        action="{% url 'analyze_audio' %}"
-      >
-        {% csrf_token %}
-        <label for="audioFile">Select an audio file:</label>
-        <input
-          type="file"
-          id="audioFile"
-          name="audio_file"
-          accept="audio/*"
-          required
-        />
-        <button type="submit">Analyze</button>
-      </form>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+        Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f3f4f6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    "
+  >
+    <div style="width: 90%; max-width: 1200px; padding: 2rem">
+      <!-- Header Section -->
+      <div style="text-align: center; margin-bottom: 2rem">
+        <h1
+          style="
+            color: #1f2937;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+          "
+        >
+          Audio Analysis Dashboard
+        </h1>
+        <p style="color: #6b7280; font-size: 1.125rem; margin: 0">
+          Upload your audio file for detailed analysis
+        </p>
+      </div>
 
-      <div id="results"></div>
+      <!-- Main Container -->
+      <div
+        style="
+          background: white;
+          border-radius: 1rem;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+            0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          padding: 2rem;
+        "
+      >
+        <!-- Upload Form -->
+        <form
+          id="uploadForm"
+          method="post"
+          enctype="multipart/form-data"
+          action="{% url 'analyze_audio' %}"
+          style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+          "
+        >
+          {% csrf_token %}
+
+          <!-- Upload Zone -->
+          <div
+            style="
+              width: 100%;
+              max-width: 500px;
+              border: 2px dashed #e5e7eb;
+              border-radius: 0.75rem;
+              padding: 2rem;
+              text-align: center;
+              cursor: pointer;
+              transition: all 0.3s ease;
+            "
+            id="dropZone"
+          >
+            <!-- Upload Icon -->
+            <div style="margin-bottom: 1rem">
+              <svg
+                style="
+                  width: 3rem;
+                  height: 3rem;
+                  color: #6b7280;
+                  margin: 0 auto;
+                "
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                />
+              </svg>
+            </div>
+
+            <!-- Upload Text -->
+            <div style="margin-bottom: 1rem">
+              <label
+                for="audioFile"
+                style="color: #4f46e5; font-weight: 500; cursor: pointer"
+                >Choose an audio file</label
+              >
+              <input
+                type="file"
+                id="audioFile"
+                name="audio_file"
+                accept="audio/*"
+                required
+                style="display: none"
+              />
+              <p style="color: #6b7280; margin: 0.5rem 0; font-size: 0.875rem">
+                or drag and drop
+              </p>
+              <p style="color: #9ca3af; margin: 0; font-size: 0.75rem">
+                MP3, WAV up to 10MB
+              </p>
+            </div>
+          </div>
+
+          <!-- File Info Preview -->
+          <div
+            id="fileInfo"
+            style="
+              display: none;
+              width: 100%;
+              max-width: 500px;
+              background-color: #f9fafb;
+              border-radius: 0.5rem;
+              padding: 1rem;
+            "
+          >
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+              "
+            >
+              <div style="display: flex; align-items: center; gap: 0.5rem">
+                <svg
+                  style="width: 1.5rem; height: 1.5rem; color: #4f46e5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                  />
+                </svg>
+                <span
+                  id="fileName"
+                  style="color: #1f2937; font-size: 0.875rem"
+                ></span>
+              </div>
+              <button
+                type="button"
+                id="removeFile"
+                style="
+                  color: #ef4444;
+                  background: none;
+                  border: none;
+                  cursor: pointer;
+                  font-size: 0.875rem;
+                "
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            style="
+              background-color: #4f46e5;
+              color: white;
+              padding: 0.75rem 1.5rem;
+              border: none;
+              border-radius: 0.5rem;
+              font-weight: 500;
+              cursor: pointer;
+              transition: background-color 0.3s ease;
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+            "
+          >
+            Analyze Audio
+            <svg
+              style="width: 1.25rem; height: 1.25rem"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+        </form>
+
+        <!-- Loading Spinner (Initially Hidden) -->
+        <div
+          id="loading"
+          style="
+            display: none;
+            margin: 2rem auto;
+            width: 2.5rem;
+            height: 2.5rem;
+            border: 3px solid #e5e7eb;
+            border-top: 3px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          "
+        ></div>
+
+        <!-- Results Section -->
+        <div id="results" style="margin-top: 2rem; display: none">
+          <h2
+            style="
+              color: #1f2937;
+              font-size: 1.25rem;
+              font-weight: 600;
+              margin-bottom: 1rem;
+            "
+          >
+            Analysis Results
+          </h2>
+          <!-- Table will be inserted here by JavaScript -->
+        </div>
+      </div>
     </div>
 
     <script>
       const form = document.getElementById("uploadForm");
+      const dropZone = document.getElementById("dropZone");
+      const fileInput = document.getElementById("audioFile");
+      const fileInfo = document.getElementById("fileInfo");
+      const fileName = document.getElementById("fileName");
+      const removeFile = document.getElementById("removeFile");
+      const loading = document.getElementById("loading");
+      const results = document.getElementById("results");
+
+      // Drag and drop handling
+      ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+      });
+
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      ["dragenter", "dragover"].forEach((eventName) => {
+        dropZone.addEventListener(eventName, highlight, false);
+      });
+
+      ["dragleave", "drop"].forEach((eventName) => {
+        dropZone.addEventListener(eventName, unhighlight, false);
+      });
+
+      function highlight(e) {
+        dropZone.style.borderColor = "#4f46e5";
+        dropZone.style.backgroundColor = "rgba(79, 70, 229, 0.1)";
+      }
+
+      function unhighlight(e) {
+        dropZone.style.borderColor = "#e5e7eb";
+        dropZone.style.backgroundColor = "transparent";
+      }
+
+      dropZone.addEventListener("drop", handleDrop, false);
+
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        fileInput.files = files;
+        updateFileInfo();
+      }
+
+      // File selection handling
+      fileInput.addEventListener("change", updateFileInfo);
+
+      function updateFileInfo() {
+        if (fileInput.files.length > 0) {
+          fileInfo.style.display = "block";
+          fileName.textContent = fileInput.files[0].name;
+        } else {
+          fileInfo.style.display = "none";
+        }
+      }
+
+      removeFile.addEventListener("click", () => {
+        fileInput.value = "";
+        fileInfo.style.display = "none";
+      });
+
+      // Form submission
       form.onsubmit = async function (e) {
         e.preventDefault();
-        const formData = new FormData(form);
-        const response = await fetch("{% url 'analyze_audio' %}", {
-          method: "POST",
-          body: formData,
-        });
+        loading.style.display = "block";
+        results.style.display = "none";
 
-        if (response.ok) {
-          const data = await response.json();
-          displayTable(data);
-        } else {
-          document.getElementById("results").innerHTML =
-            "Error analyzing audio file.";
+        const formData = new FormData(form);
+
+        try {
+          const response = await fetch("{% url 'analyze_audio' %}", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            displayResults(data);
+          } else {
+            throw new Error("Analysis failed");
+          }
+        } catch (error) {
+          showError("An error occurred while analyzing the audio file.");
+        } finally {
+          loading.style.display = "none";
         }
       };
 
-      function displayTable(data) {
-        // Clear any previous results
-        const resultsDiv = document.getElementById("results");
-        resultsDiv.innerHTML = "";
+      function displayResults(data) {
+        results.style.display = "block";
 
-        // Convert data to array format if it's a single object
+        // Create table with inline styles
+        const table = document.createElement("table");
+        table.style.width = "100%";
+        table.style.borderCollapse = "collapse";
+        table.style.backgroundColor = "white";
+        table.style.borderRadius = "0.5rem";
+        table.style.overflow = "hidden";
+
         const dataArray = Array.isArray(data) ? data : [data];
 
-        // Create a table element
-        const table = document.createElement("table");
-
-        // Populate rows for each attribute
         Object.entries(dataArray[0]).forEach(([key, value]) => {
           const row = document.createElement("tr");
+          row.style.borderBottom = "1px solid #e5e7eb";
 
           const keyCell = document.createElement("th");
-          keyCell.textContent = key.charAt(0).toUpperCase() + key.slice(1);
-          row.appendChild(keyCell);
+          keyCell.style.padding = "1rem";
+          keyCell.style.textAlign = "left";
+          keyCell.style.backgroundColor = "#f9fafb";
+          keyCell.style.color = "#374151";
+          keyCell.style.fontWeight = "500";
+          keyCell.style.width = "30%";
+          keyCell.textContent =
+            key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, " ");
 
           const valueCell = document.createElement("td");
+          valueCell.style.padding = "1rem";
+          valueCell.style.color = "#6b7280";
           valueCell.textContent = value;
-          row.appendChild(valueCell);
 
+          row.appendChild(keyCell);
+          row.appendChild(valueCell);
           table.appendChild(row);
         });
 
-        // Add the table to the results div
-        resultsDiv.appendChild(table);
+        results.innerHTML = "";
+        results.appendChild(table);
       }
+
+      function showError(message) {
+        results.style.display = "block";
+        results.innerHTML = `
+                <div style="background-color: #fef2f2; border-radius: 0.5rem; padding: 1rem; color: #991b1b;">
+                    <div style="display: flex; align-items: flex-start;">
+                        <svg style="width: 1.25rem; height: 1.25rem; color: #dc2626; margin-right: 0.75rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <div>
+                            <h3 style="margin: 0 0 0.25rem 0; font-size: 0.875rem; font-weight: 600;">Error</h3>
+                            <p style="margin: 0; font-size: 0.875rem;">${message}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+      }
+
+      // Add keyframe animation for spinner
+      const style = document.createElement("style");
+      style.textContent = `
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `;
+      document.head.appendChild(style);
     </script>
   </body>
 </html>

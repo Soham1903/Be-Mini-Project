@@ -18,6 +18,14 @@ import json
 from PIL import Image, ImageEnhance
 import pytesseract
 from .forms import ImageUploadForm
+from .utils.speaker_identification import SpeakerIdentification
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+import noisereduce as nr
+from pydub import AudioSegment
+import whisper
+from moviepy import VideoFileClip
+import soundfile as sf
 
 nltk.download('stopwords')
 stop_words = set(stopwords.words("english"))
@@ -274,7 +282,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 
 # Configure your Google API Key
-GOOGLE_API_KEY = 'AIzaSyDQIB2HKCAS4iDQI87vvoBhu7dNBpJsJio'
+GOOGLE_API_KEY = 'AIzaSyBb050DVRILhyPuzJVmR4nvvt6qBljm3Qg'
 genai.configure(api_key=GOOGLE_API_KEY)
 
 # Initialize the model
@@ -298,3 +306,92 @@ def chatbot_view(request):
         return JsonResponse({'response': chatbot_response})
 
     return render(request, 'chatbot.html')
+
+import google.generativeai as genai
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+@csrf_exempt
+def process_video(request):
+    if request.method == "POST" and request.FILES.get("video"):
+        video_file = request.FILES["video"]
+
+        # Save the uploaded file temporarily
+        video_path = os.path.join("media", video_file.name)
+        with open(video_path, "wb+") as destination:
+            for chunk in video_file.chunks():
+                destination.write(chunk)
+
+        try:
+            # Process the video using SpeakerIdentification class
+            processor = SpeakerIdentification(video_path)
+            transcripts = processor.process_video(n_speakers=2)
+
+            # ✅ Prepare statements for batch fact-checking
+            statements = [entry["text"] for entry in transcripts]
+            print(statements)
+            fact_check_results = batch_fact_check(statements)
+            print(fact_check_results)
+
+            # ✅ Return Transcriptions & Fact Check Results
+            return JsonResponse({
+                "status": "success",
+                "transcripts": transcripts,
+                "facts": fact_check_results
+            })
+
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)})
+
+    return render(request, "upload.html")
+
+import openai
+import json
+openai.api_key = os.getenv("OPENAI_API_KEY")# No code was selected, so I will provide a general improvement to the code.
+
+# Add error handling to the batch_fact_check function
+def batch_fact_check(statements):
+    """Fact-check each statement individually using Gemini."""
+    results = []
+
+    for statement in statements:
+        try:
+            # ✅ Define prompt for a single statement
+            prompt = f"""
+            Fact-check the following statement:
+            
+            "{statement}"
+            
+            Return a JSON object with:
+            {{
+                "statement": "{statement}",
+                "verdict": "True / False / Misleading",
+                "explanation": "Short reason"
+            }}
+            """
+
+            # ✅ Send request to Gemini
+            response = genai.GenerativeModel("gemini-pro").generate_content(prompt)
+
+            # ✅ Extract and parse the response
+            fact_check_text = response.text  # Gemini returns plain text
+            fact_check_result = json.loads(fact_check_text)  # Convert to dictionary
+
+            # ✅ Append to results
+            results.append(fact_check_result)
+
+        except json.JSONDecodeError as e:
+            results.append({
+                "statement": statement,
+                "verdict": "Unknown",
+                "explanation": f"Failed to parse JSON response: {str(e)}"
+            })
+        except Exception as e:
+            results.append({
+                "statement": statement,
+                "verdict": "Unknown",
+                "explanation": f"An error occurred: {str(e)}"
+            })
+
+    # ✅ Debug Output
+    print(json.dumps(results, indent=2))  
+
+    return results

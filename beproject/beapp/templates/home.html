@@ -3,88 +3,218 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Home</title>
+    <title>Legal Analysis & Fact Checking</title>
     <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
       body {
-        font-family: Arial, sans-serif;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: #212529;
         display: flex;
         flex-direction: column;
-        justify-content: center;
         align-items: center;
-        height: 100vh;
-        margin: 0;
-        background: linear-gradient(
-          135deg,
-          #f0f786,
-          #ffe608
-        ); /* Gradient background */
+        padding: 40px 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+      }
+
+      .header {
         text-align: center;
-        color: #ffffff;
+        margin-bottom: 50px;
+        animation: fadeIn 0.8s ease-out;
       }
-      h1 {
-        font-size: 28px;
-        color: #333;
-        margin-bottom: 20px;
+
+      .header h1 {
+        font-size: 2.5rem;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        font-weight: 600;
       }
-      .outer-square {
-        width: 400px;
-        height: 400px;
+
+      .header p {
+        color: #6c757d;
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .grid-container {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: 1fr 1fr;
-        gap: 20px;
-        background-color: #e0e0e0;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
         padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        animation: slideUp 0.8s ease-out;
       }
+
+      .card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        position: relative;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+      }
+
       .button {
         display: flex;
-        justify-content: center;
+        flex-direction: column;
         align-items: center;
-        background-color: #007bff;
-        color: white;
-        font-size: 18px;
-        font-weight: bold;
-        text-align: center;
+        justify-content: center;
+        padding: 30px 20px;
+        width: 100%;
+        height: 100%;
         border: none;
-        border-radius: 10px;
+        background: white;
         cursor: pointer;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        text-decoration: none;
+        color: #2c3e50;
+        transition: background-color 0.3s ease;
       }
+
       .button:hover {
-        background-color: #0056b3;
+        background-color: #f8f9fa;
+      }
+
+      .button-icon {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        color: #3498db;
+      }
+
+      .button-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      .button-description {
+        font-size: 0.9rem;
+        color: #6c757d;
+        text-align: center;
+        line-height: 1.4;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 2rem;
+        }
+
+        .grid-container {
+          grid-template-columns: 1fr;
+          padding: 15px;
+        }
       }
     </style>
   </head>
   <body>
-    <h1>🎙️ Automatic Fact Checking</h1>
-    <!-- Title with emoji -->
-    <div class="outer-square">
-      <button
-        class="button"
-        onclick="window.location.href='{% url 'analyze_audio' %}'"
-      >
-        Analyze Audio
-      </button>
-      <button
-        class="button"
-        onclick="window.location.href='{% url 'analyze_legal_query' %}'"
-      >
-        Analyze Legal Query
-      </button>
-      <button
-        class="button"
-        onclick="window.location.href='{% url 'ocr_view' %}'"
-      >
-        OCR
-      </button>
-      <button
-        class="button"
-        onclick="window.location.href='{% url 'chatbot_view' %}'"
-      >
-        Chatbot
-      </button>
+    <div class="container">
+      <header class="header">
+        <h1>🔍 Legal Analysis & Fact Checking</h1>
+        <p>Comprehensive tools for legal document analysis and fact-checking</p>
+      </header>
+
+      <div class="grid-container">
+        <div class="card">
+          <button
+            class="button"
+            onclick="window.location.href='{% url 'analyze_audio' %}'"
+          >
+            <div class="button-icon">🎙️</div>
+            <div class="button-title">Audio Analysis</div>
+            <div class="button-description">
+              Transcribe and analyze audio recordings with speaker
+              identification
+            </div>
+          </button>
+        </div>
+
+        <div class="card">
+          <button
+            class="button"
+            onclick="window.location.href='{% url 'analyze_legal_query' %}'"
+          >
+            <div class="button-icon">⚖️</div>
+            <div class="button-title">Legal Query Analysis</div>
+            <div class="button-description">
+              Process and validate legal documents and queries
+            </div>
+          </button>
+        </div>
+
+        <div class="card">
+          <button
+            class="button"
+            onclick="window.location.href='{% url 'ocr_view' %}'"
+          >
+            <div class="button-icon">📝</div>
+            <div class="button-title">OCR Processing</div>
+            <div class="button-description">
+              Extract text from images and scanned documents
+            </div>
+          </button>
+        </div>
+
+        <div class="card">
+          <button
+            class="button"
+            onclick="window.location.href='{% url 'chatbot_view' %}'"
+          >
+            <div class="button-icon">💬</div>
+            <div class="button-title">Legal Assistant</div>
+            <div class="button-description">
+              AI-powered legal consultation and assistance
+            </div>
+          </button>
+        </div>
+
+        <div class="card">
+          <button
+            class="button"
+            onclick="window.location.href='{% url 'process_video' %}'"
+          >
+            <div class="button-icon">🎥</div>
+            <div class="button-title">Video Transcription</div>
+            <div class="button-description">
+              Convert video content to searchable text with speaker detection
+            </div>
+          </button>
+        </div>
+      </div>
     </div>
   </body>
 </html>

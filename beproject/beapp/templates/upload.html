@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Speaker Identification & Fact Check</title>
+    <script>
+      function uploadVideo(event) {
+        event.preventDefault();
+
+        document.getElementById("loadingSpinner").style.display = "flex";
+        document.getElementById("uploadButton").disabled = true;
+
+        let formData = new FormData(document.getElementById("uploadForm"));
+        fetch("{% url 'process_video' %}", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.status === "success") {
+              displayTranscriptions(data.transcripts);
+              displayFactResults(data.facts);
+            } else {
+              alert("Error: " + data.message);
+            }
+          })
+          .catch((error) => console.error("Error:", error))
+          .finally(() => {
+            document.getElementById("loadingSpinner").style.display = "none";
+            document.getElementById("uploadButton").disabled = false;
+          });
+      }
+
+      function displayTranscriptions(transcripts) {
+        let outputDiv = document.getElementById("transcriptionResults");
+        outputDiv.innerHTML = "";
+        transcripts.forEach((entry, index) => {
+          let transcriptHtml = `
+            <div style="margin-bottom: 20px; padding: 15px; background-color: ${
+              index % 2 === 0 ? "#f8f9fa" : "#ffffff"
+            }; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+              <div style="color: #2c3e50; font-weight: 600; margin-bottom: 8px;">${
+                entry.speaker
+              }</div>
+              <div style="color: #34495e; line-height: 1.6;">${entry.text}</div>
+            </div>`;
+          outputDiv.innerHTML += transcriptHtml;
+        });
+      }
+
+      function displayFactResults(facts) {
+        let factDiv = document.getElementById("factCheckResults");
+        factDiv.innerHTML = "";
+
+        facts.forEach((fact, index) => {
+          let factHtml = `
+            <div style="margin-bottom: 20px; padding: 15px; 
+                        background-color: ${
+                          fact.isTrue ? "#d4edda" : "#f8d7da"
+                        }; 
+                        border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                
+                <div style="color: #2c3e50; font-weight: 600; margin-bottom: 8px;">
+                    Fact ${index + 1}
+                </div>
+
+                <div style="color: #34495e; line-height: 1.6; font-weight: 500;">
+                    <strong>Statement:</strong> ${fact.statement}
+                </div>
+
+                <div style="font-weight: bold; margin-top: 10px;
+                            color: ${fact.isTrue ? "#155724" : "#721c24"};">
+                    <strong>Status:</strong> ${
+                      fact.isTrue ? "✅ True" : "❌ False"
+                    }
+                </div>
+            </div>
+        `;
+
+          factDiv.insertAdjacentHTML("beforeend", factHtml);
+        });
+      }
+
+      function handleFileSelect(input) {
+        const fileName = input.files[0]?.name;
+        document.getElementById("fileNameDisplay").textContent =
+          fileName || "No file selected";
+      }
+    </script>
+  </head>
+  <body>
+    <div style="max-width: 800px; margin: 0 auto; padding: 40px 20px">
+      <h1 style="text-align: center; color: #1a73e8">
+        Speaker Identification & Fact Check
+      </h1>
+      <form
+        id="uploadForm"
+        enctype="multipart/form-data"
+        onsubmit="uploadVideo(event)"
+      >
+        {% csrf_token %}
+        <input
+          type="file"
+          name="video"
+          required
+          onchange="handleFileSelect(this)"
+          id="fileInput"
+          accept="video/*"
+        />
+        <button id="uploadButton" type="submit">Upload & Process</button>
+      </form>
+      <div id="loadingSpinner" style="display: none">Processing...</div>
+      <h2>Transcription Results</h2>
+      <div id="transcriptionResults"></div>
+      <h2>Fact Check Results</h2>
+      <div id="factCheckResults"></div>
+    </div>
+  </body>
+</html>
